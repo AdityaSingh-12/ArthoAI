@@ -1,13 +1,16 @@
-import { IconClipboard, IconGrid, IconSettings, IconUsers } from '../icons'
+import { IconActivity, IconClipboard, IconGrid, IconSettings, IconUsers } from '../icons'
 import { useAppState } from "../../state/AppState"
 import { useLang } from '../../i18n/LanguageContext'
+import type { MessageKey } from '../../i18n/strings'
+import type { PageId } from '../../types'
 
-const NAV_ITEMS = [
+const NAV_ITEMS: { id: PageId; label: string; icon: typeof IconGrid }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: IconGrid },
+  { id: 'monitoring', label: 'Live Monitoring', icon: IconActivity },
   { id: 'assessments', label: 'Assessments', icon: IconClipboard },
   { id: 'patients', label: 'Patients', icon: IconUsers },
   { id: 'settings', label: 'Settings', icon: IconSettings },
-] as const
+]
 
 type SidebarProps = {
   open: boolean
@@ -69,7 +72,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                 aria-current={isActive ? 'page' : undefined}
               >
                 <Icon size={18} />
-                <span>{t(`nav${item.label.charAt(0).toUpperCase() + item.label.slice(1)}`) || item.label}</span>
+                <span>{t(`nav${item.id.charAt(0).toUpperCase() + item.id.slice(1)}` as MessageKey) || item.label}</span>
               </button>
             )
           })}

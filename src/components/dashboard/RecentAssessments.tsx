@@ -36,7 +36,7 @@ export function RecentAssessments({ assessments }: RecentAssessmentsProps) {
                 <td>{row.joint}</td>
                 <td>{row.score}</td>
                 <td>
-                  <span className={`risk-badge risk-${row.risk.toLowerCase()}`}>{row.risk}</span>
+                  <span className={`risk-badge risk-${(row.risk || 'low').toLowerCase()}`}>{row.risk || 'Low'}</span>
                 </td>
                 <td className="muted">{row.date}</td>
               </tr>

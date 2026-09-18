@@ -5,24 +5,28 @@ export type KneeSide = 'left' | 'right' | 'both'
 
 export type DeviceLink = 'off' | 'connecting' | 'on'
 
-export type PageId = 'dashboard' | 'assessments' | 'patients' | 'settings'
+export type PageId = 'dashboard' | 'assessments' | 'patients' | 'settings' | 'monitoring'
 
 export type Patient = {
   id: string
   name: string
   age: number
+  village?: string
+  phone?: string
 }
 
 export type RiskLevel = 'Low' | 'Moderate' | 'High'
 
 export type Assessment = {
   id: string
-  patientId: string
+  patientId?: string
   patientName: string
   age: number
-  joint: 'Left Knee' | 'Right Knee' | 'Bilateral'
-  risk: RiskLevel
-  score: number
+  knee?: KneeSide
+  joint?: 'Left Knee' | 'Right Knee' | 'Bilateral'
+  risk?: RiskLevel
+  score?: number
+  status?: string
   date: string
 }
 

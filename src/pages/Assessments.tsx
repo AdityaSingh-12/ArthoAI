@@ -39,7 +39,7 @@ export function Assessments({ onStartAssessment }: AssessmentsProps) {
               <div>
                 <strong>{row.patientName}</strong>
                 <p>
-                  {row.age} {t('years')} · {t(KNEE_KEYS[row.knee])}
+                  {row.age} {t('years')} {row.knee && KNEE_KEYS[row.knee] ? `· ${t(KNEE_KEYS[row.knee])}` : row.joint ? `· ${row.joint}` : ''}
                 </p>
               </div>
               <div className="record-meta">

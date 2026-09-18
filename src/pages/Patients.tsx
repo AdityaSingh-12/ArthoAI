@@ -8,7 +8,12 @@ type PatientsProps = {
 
 export function Patients({ onAddPatient }: PatientsProps) {
   const { t } = useLang()
-  const { patients } = useAppState()
+  const { patients, setSelectedPatient, setPage } = useAppState()
+
+  const handleStartMonitoring = (person: (typeof patients)[0]) => {
+    setSelectedPatient(person)
+    setPage('monitoring')
+  }
 
   return (
     <section className="panel">
@@ -27,15 +32,23 @@ export function Patients({ onAddPatient }: PatientsProps) {
       ) : (
         <ul className="record-list">
           {patients.map((person) => (
-            <li key={person.id} className="record-card">
+            <li key={person.id} className="record-card patient-card-item">
               <div>
                 <strong>{person.name}</strong>
                 <p>
                   {person.age} {t('years')}
                   {person.village ? ` · ${person.village}` : ''}
                 </p>
+                {person.phone ? <p className="muted">{person.phone}</p> : null}
               </div>
-              {person.phone ? <p className="muted">{person.phone}</p> : null}
+              <button
+                type="button"
+                className="btn-primary btn-sm"
+                onClick={() => handleStartMonitoring(person)}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                Live Monitoring
+              </button>
             </li>
           ))}
         </ul>

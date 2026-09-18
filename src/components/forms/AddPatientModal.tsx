@@ -10,7 +10,7 @@ type AddPatientModalProps = {
 
 export function AddPatientModal({ open, onClose }: AddPatientModalProps) {
   const { t } = useLang()
-  const { addPatient, setPage } = useAppState()
+  const { addPatient, setPage, setSelectedPatient } = useAppState()
   const [name, setName] = useState('')
   const [age, setAge] = useState('')
   const [village, setVillage] = useState('')
@@ -37,14 +37,15 @@ export function AddPatientModal({ open, onClose }: AddPatientModalProps) {
       setError(t('requiredAge'))
       return
     }
-    addPatient({
+    const newPatient = addPatient({
       name: name.trim(),
       age: Number(age),
       village: village.trim(),
       phone: phone.trim(),
     })
+    setSelectedPatient(newPatient)
     reset()
-    setPage('patients')
+    setPage('monitoring')
     onClose()
   }
 

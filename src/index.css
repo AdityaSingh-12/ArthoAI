@@ -650,3 +650,144 @@ select {
     flex-direction: column;
   }
 }
+
+/* ── Live Monitoring Page Styles ── */
+.monitoring-page {
+  display: grid;
+  gap: 20px;
+}
+
+.monitoring-patient-bar {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.monitoring-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.monitoring-patient-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.monitoring-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #14b8a6, #0f766e);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.monitoring-patient-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.monitoring-patient-meta {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.monitoring-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-pill--off {
+  background: #f1f5f9;
+  color: var(--muted);
+}
+
+.pulse-off {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.btn-stop {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(180deg, #dc2626, #b91c1c);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 700;
+  box-shadow: 0 8px 16px rgba(220, 38, 38, 0.22);
+  cursor: pointer;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  border-radius: 8px;
+}
+
+.sensor-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sensor-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.monitoring-graphs-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.record-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.record-card {
+  padding: 14px 18px;
+  background: #f8fbfc;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.patient-card-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .sensor-grid--3,
+  .sensor-grid--2,
+  .monitoring-graphs-row {
+    grid-template-columns: 1fr;
+  }
+}
+

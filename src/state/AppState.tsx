@@ -7,6 +7,8 @@ type AppStateValue = {
   patients: Patient[]
   assessments: Assessment[]
   deviceLink: DeviceLink
+  selectedPatient: Patient | null
+  setSelectedPatient: (patient: Patient | null) => void
   addPatient: (patient: Omit<Patient, 'id'>) => Patient
   addAssessment: (assessment: Omit<Assessment, 'id' | 'status' | 'date'>) => void
   connectSensors: () => void
@@ -24,6 +26,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [patients, setPatients] = useState<Patient[]>([])
   const [assessments, setAssessments] = useState<Assessment[]>([])
   const [deviceLink, setDeviceLink] = useState<DeviceLink>('off')
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
 
   const value = useMemo<AppStateValue>(
     () => ({
@@ -32,6 +35,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       patients,
       assessments,
       deviceLink,
+      selectedPatient,
+      setSelectedPatient,
       addPatient: (patient) => {
         let saved: Patient = { ...patient, id: nextId('P', 0) }
         setPatients((prev) => {
@@ -64,7 +69,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       },
       disconnectSensors: () => setDeviceLink('off'),
     }),
-    [page, patients, assessments, deviceLink],
+    [page, patients, assessments, deviceLink, selectedPatient],
   )
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>

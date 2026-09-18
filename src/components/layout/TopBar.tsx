@@ -1,5 +1,6 @@
 import { IconBell, IconMenu, IconPlus } from '../icons'
 import { useLang } from '../../i18n/LanguageContext'
+import { useAppState } from '../../state/AppState'
 
 type TopBarProps = {
   onMenu: () => void
@@ -8,6 +9,15 @@ type TopBarProps = {
 
 export function TopBar({ onMenu, onNewAssessment }: TopBarProps) {
   const { t, lang, setLang } = useLang()
+  const { page } = useAppState()
+
+  const pageTitles: Record<string, string> = {
+    dashboard: t('navDashboard'),
+    monitoring: t('navLiveMonitoring'),
+    assessments: t('navAssessments'),
+    patients: t('navPatients'),
+    settings: t('navSettings'),
+  }
 
   return (
     <header className="topbar">
@@ -17,7 +27,7 @@ export function TopBar({ onMenu, onNewAssessment }: TopBarProps) {
         </button>
         <div>
           <p className="eyebrow">NavDristi</p>
-          <h1>Dashboard</h1>
+          <h1>{pageTitles[page] || 'Dashboard'}</h1>
         </div>
       </div>
 
