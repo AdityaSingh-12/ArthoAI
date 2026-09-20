@@ -54,7 +54,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             </svg>
           </div>
           <div>
-            <p className="brand-name">NavDristi</p>
+            <p className="brand-name">ArthoAI</p>
             <p className="brand-tag">{t('brandTag')}</p>
           </div>
         </div>
@@ -80,7 +80,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
         <div className="sidebar-footer">
           <p className="sidebar-hint">{t('sidebarHelp') || 'Made for local health workers'}</p>
-          <p className="sidebar-meta">{t('savedOnDevice') || 'Saved on this device only'}</p>
+          <p className="sidebar-meta">{t('savedOnDevice') || 'Saved on this device only '}</p>
         </div>
       </aside>
     </>

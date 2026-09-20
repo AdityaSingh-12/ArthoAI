@@ -1,5 +1,5 @@
 export const en = {
-  appTitle: 'NavDristi — Knee health helper',
+  appTitle: 'ArthoAI — Knee health helper',
   brandTag: 'Knee health helper',
   navDashboard: 'Dashboard',
   navLiveMonitoring: 'Live Monitoring',
@@ -11,7 +11,7 @@ export const en = {
   language: 'Language',
   langEnglish: 'English',
   langHindi: 'Hindi',
-  welcomeTitle: 'Welcome to NavDristi',
+  welcomeTitle: 'Welcome to ArthoAI',
   welcomeBody:
     'This app helps you check knee pain. First add a patient, then start an assessment.',
   emptyNote: 'Nothing is saved yet. Start with Add Patient.',
@@ -59,7 +59,7 @@ export const en = {
   settingsTitle: 'Settings',
   aboutTitle: 'About this app',
   aboutBody:
-    'NavDristi is a simple helper for knee health. It does not replace a doctor. For now, information stays on this device.',
+    'ArthoAI is a simple helper for knee health. It does not replace a doctor. For now, information stays on this device.',
   savedOnDevice: 'Saved on this device only',
   sidebarHelp: 'Made for local health workers',
   addPatientTitle: 'Add Patient',
@@ -75,7 +75,7 @@ export const en = {
 }
 
 export const hi: Record<keyof typeof en, string> = {
-  appTitle: 'नवदृष्टि — घुटने की सेहत सहायक',
+  appTitle: 'आर्थो एआई — घुटने की सेहत सहायक',
   brandTag: 'घुटने की सेहत सहायक',
   navDashboard: 'डैशबोर्ड',
   navLiveMonitoring: 'लाइव मॉनिटरिंग',
@@ -87,7 +87,7 @@ export const hi: Record<keyof typeof en, string> = {
   language: 'भाषा',
   langEnglish: 'अंग्रेज़ी',
   langHindi: 'हिन्दी',
-  welcomeTitle: 'नवदृष्टि में आपका स्वागत है',
+  welcomeTitle: 'आर्थो एआई में आपका स्वागत है',
   welcomeBody: 'यह ऐप घुटने के दर्द की जाँच में मदद करता है। पहले मरीज़ जोड़ें, फिर जाँच शुरू करें।',
   emptyNote: 'अभी कुछ सेव नहीं है। मरीज़ जोड़ें से शुरू करें।',
   addPatient: 'मरीज़ जोड़ें',
@@ -134,7 +134,7 @@ export const hi: Record<keyof typeof en, string> = {
   settingsTitle: 'सेटिंग्स',
   aboutTitle: 'इस ऐप के बारे में',
   aboutBody:
-    'नवदृष्टि घुटने की सेहत के लिए एक सरल सहायक है। यह डॉक्टर की जगह नहीं लेता। अभी जानकारी इसी डिवाइस पर रहती है।',
+    'आर्थो एआई घुटने की सेहत के लिए एक सरल सहायक है। यह डॉक्टर की जगह नहीं लेता। अभी जानकारी इसी डिवाइस पर रहती है।',
   savedOnDevice: 'केवल इसी डिवाइस पर सेव',
   sidebarHelp: 'स्थानीय स्वास्थ्य कार्यकर्ताओं के लिए',
   addPatientTitle: 'मरीज़ जोड़ें',

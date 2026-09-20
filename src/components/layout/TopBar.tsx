@@ -26,7 +26,7 @@ export function TopBar({ onMenu, onNewAssessment }: TopBarProps) {
           <IconMenu />
         </button>
         <div>
-          <p className="eyebrow">NavDristi</p>
+          <p className="eyebrow">ArthoAI</p>
           <h1>{pageTitles[page] || 'Dashboard'}</h1>
         </div>
       </div>
@@ -35,12 +35,12 @@ export function TopBar({ onMenu, onNewAssessment }: TopBarProps) {
         <button type="button" className="icon-btn" aria-label={t('language') || 'Language'}>
           <IconBell />
         </button>
-        
+
         {/* Simple language toggle in header */}
         <div className="topbar-language">
-          <button 
-            type="button" 
-            className="lang-toggle-btn" 
+          <button
+            type="button"
+            className="lang-toggle-btn"
             onClick={() => setLang(lang === 'en' ? 'hi' : 'en')}
             aria-label={t('language') || 'Switch language'}
           >
