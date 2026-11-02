@@ -1,14 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { useCallback, useEffect, useState } from 'react'
 import type { GraphPoint, SensorReading } from '../types'
 
-/**
- * Monitoring-specific sensor data: 8 sensors arranged in logical groups,
- * plus multiple graph series. Designed so real hardware can replace the
- * mock `tick()` function later.
- */
-
+const API_URL = 'http://localhost:3001/api/sensor'
+const POLL_MS = 700
 const GRAPH_WINDOW = 50
-const TICK_MS = 700
+
+type BackendReading = {
+  fsr: number
+  pressureDetected: boolean
+  ax: number
+  ay: number
+  az: number
+  gx: number
+  gy: number
+  gz: number
+  receivedAt?: string
+}
 
 export type MonitoringSensors = {
   gait: SensorReading[]
@@ -16,140 +24,169 @@ export type MonitoringSensors = {
   force: SensorReading[]
 }
 
-const initialGait: SensorReading[] = [
-  { id: 'step-count', name: 'Step Count', unit: 'steps', value: 0, min: 0, max: 10000, status: 'disconnected' },
-  { id: 'cadence', name: 'Gait Cadence', unit: 'spm', value: 0, min: 60, max: 160, status: 'disconnected' },
-  { id: 'stride-len', name: 'Stride Length', unit: 'cm', value: 0, min: 40, max: 120, status: 'disconnected' },
-]
-
-const initialJoint: SensorReading[] = [
-  { id: 'flex-l', name: 'Left Knee Flexion', unit: '°', value: 0, min: 0, max: 140, status: 'disconnected' },
-  { id: 'flex-r', name: 'Right Knee Flexion', unit: '°', value: 0, min: 0, max: 140, status: 'disconnected' },
-]
-
-const initialForce: SensorReading[] = [
-  { id: 'grf', name: 'Ground Reaction Force', unit: 'N', value: 0, min: 100, max: 1200, status: 'disconnected' },
-  { id: 'heel-pres', name: 'Heel Pressure', unit: 'kPa', value: 0, min: 10, max: 400, status: 'disconnected' },
-  { id: 'toe-pres', name: 'Toe Pressure', unit: 'kPa', value: 0, min: 10, max: 350, status: 'disconnected' },
-]
-
-function jitter(value: number, amount: number, min: number, max: number) {
-  const next = value + (Math.random() - 0.5) * amount
-  return Math.min(max, Math.max(min, next))
+function makeSensor(
+  id: string,
+  name: string,
+  unit: string,
+  min: number,
+  max: number,
+): SensorReading {
+  return { id, name, unit, value: 0, min, max, status: 'disconnected' }
 }
 
-function seedSeries(count: number, base: number, amp: number): GraphPoint[] {
-  return Array.from({ length: count }, (_, i) => ({
-    t: i,
-    value: base + Math.sin(i / 4) * amp + (Math.random() - 0.5) * 3,
-  }))
+function makeSeries(value: number): GraphPoint[] {
+  return [{ t: 0, value }]
 }
 
-/** Activate sensors — sets each to 'connected' with a realistic starting value */
-function activate(sensors: SensorReading[]): SensorReading[] {
-  const startValues: Record<string, number> = {
-    'step-count': 0,
-    cadence: 112,
-    'stride-len': 72,
-    'flex-l': 38,
-    'flex-r': 41,
-    grf: 580,
-    'heel-pres': 185,
-    'toe-pres': 140,
-  }
-  return sensors.map((s) => ({
-    ...s,
-    status: 'connected' as const,
-    value: startValues[s.id] ?? s.min + (s.max - s.min) / 2,
-  }))
-}
-
-function deactivate(sensors: SensorReading[]): SensorReading[] {
-  return sensors.map((s) => ({ ...s, status: 'disconnected' as const, value: 0 }))
+function appendPoint(
+  previous: GraphPoint[],
+  value: number,
+): GraphPoint[] {
+  const nextT = (previous[previous.length - 1]?.t ?? -1) + 1
+  return [...previous, { t: nextT, value }].slice(-GRAPH_WINDOW)
 }
 
 export function useMonitoringSensors() {
   const [running, setRunning] = useState(false)
-  const [gait, setGait] = useState<SensorReading[]>(initialGait)
-  const [joint, setJoint] = useState<SensorReading[]>(initialJoint)
-  const [force, setForce] = useState<SensorReading[]>(initialForce)
+  const [reading, setReading] = useState<BackendReading | null>(null)
+  const [connected, setConnected] = useState(false)
 
-  // Graph series for the two knee flexion lines
-  const [flexLeftSeries, setFlexLeftSeries] = useState<GraphPoint[]>(() => seedSeries(GRAPH_WINDOW, 38, 6))
-  const [flexRightSeries, setFlexRightSeries] = useState<GraphPoint[]>(() => seedSeries(GRAPH_WINDOW, 41, 5))
-  const [forceSeries, setForceSeries] = useState<GraphPoint[]>(() => seedSeries(GRAPH_WINDOW, 580, 40))
-
-  const stepRef = useRef(0)
+  const [flexLeftSeries, setFlexLeftSeries] = useState<GraphPoint[]>([])
+  const [flexRightSeries, setFlexRightSeries] = useState<GraphPoint[]>([])
+  const [forceSeries, setForceSeries] = useState<GraphPoint[]>([])
 
   const start = useCallback(() => {
-    stepRef.current = 0
-    setGait(activate(initialGait))
-    setJoint(activate(initialJoint))
-    setForce(activate(initialForce))
-    setFlexLeftSeries(seedSeries(GRAPH_WINDOW, 38, 6))
-    setFlexRightSeries(seedSeries(GRAPH_WINDOW, 41, 5))
-    setForceSeries(seedSeries(GRAPH_WINDOW, 580, 40))
+    setReading(null)
+    setConnected(false)
+    setFlexLeftSeries([])
+    setFlexRightSeries([])
+    setForceSeries([])
     setRunning(true)
   }, [])
 
   const stop = useCallback(() => {
     setRunning(false)
-    setGait(deactivate)
-    setJoint(deactivate)
-    setForce(deactivate)
+    setConnected(false)
+    setReading(null)
   }, [])
 
   useEffect(() => {
     if (!running) return
 
-    const id = window.setInterval(() => {
-      stepRef.current += 1
+    let cancelled = false
 
-      // Tick gait
-      setGait((prev) =>
-        prev.map((s) => {
-          if (s.id === 'step-count') return { ...s, value: stepRef.current * 2 }
-          const amt = s.id === 'cadence' ? 4 : 5
-          return { ...s, value: Number(jitter(s.value, amt, s.min, s.max).toFixed(1)) }
-        }),
-      )
+    const fetchReading = async () => {
+      try {
+        const response = await fetch(API_URL, { cache: 'no-store' })
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
 
-      // Tick joint
-      setJoint((prev) =>
-        prev.map((s) => ({
-          ...s,
-          value: Number(jitter(s.value, 6, s.min, s.max).toFixed(1)),
-        })),
-      )
+        const data: unknown = await response.json()
 
-      // Tick force
-      setForce((prev) =>
-        prev.map((s) => {
-          const amt = s.id === 'grf' ? 40 : 20
-          return { ...s, value: Number(jitter(s.value, amt, s.min, s.max).toFixed(1)) }
-        }),
-      )
+        if (
+          !data ||
+          typeof data !== 'object' ||
+          !('fsr' in data) ||
+          typeof data.fsr !== 'number' ||
+          !('ax' in data) ||
+          typeof data.ax !== 'number' ||
+          !('ay' in data) ||
+          typeof data.ay !== 'number' ||
+          !('az' in data) ||
+          typeof data.az !== 'number' ||
+          !('gx' in data) ||
+          typeof data.gx !== 'number' ||
+          !('gy' in data) ||
+          typeof data.gy !== 'number' ||
+          !('gz' in data) ||
+          typeof data.gz !== 'number' ||
+          !('pressureDetected' in data) ||
+          typeof data.pressureDetected !== 'boolean'
+        ) {
+          throw new Error('No valid sensor data received yet')
+        }
 
-      // Update graph series
-      setFlexLeftSeries((prev) => {
-        const last = prev[prev.length - 1]
-        return [...prev.slice(1), { t: last.t + 1, value: jitter(last.value, 6, 18, 72) }]
-      })
-      setFlexRightSeries((prev) => {
-        const last = prev[prev.length - 1]
-        return [...prev.slice(1), { t: last.t + 1, value: jitter(last.value, 5, 20, 70) }]
-      })
-      setForceSeries((prev) => {
-        const last = prev[prev.length - 1]
-        return [...prev.slice(1), { t: last.t + 1, value: jitter(last.value, 40, 200, 1000) }]
-      })
-    }, TICK_MS)
+        const next = data as BackendReading
+        if (cancelled) return
 
-    return () => window.clearInterval(id)
+        setReading(next)
+        setConnected(true)
+
+        setFlexLeftSeries((prev) => appendPoint(prev, next.ax))
+        setFlexRightSeries((prev) => appendPoint(prev, next.ay))
+        setForceSeries((prev) => appendPoint(prev, next.fsr))
+      } catch (error) {
+        if (cancelled) return
+        setConnected(false)
+        console.error('Could not fetch sensor data:', error)
+      }
+    }
+
+    void fetchReading()
+    const timer = window.setInterval(() => {
+      void fetchReading()
+    }, POLL_MS)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(timer)
+    }
   }, [running])
 
-  const connectedCount = [...gait, ...joint, ...force].filter((s) => s.status === 'connected').length
-  const totalCount = gait.length + joint.length + force.length
+  const status = connected && reading ? 'connected' : 'disconnected'
+
+  const gait: SensorReading[] = [
+    {
+      ...makeSensor('fsr', 'FSR ADC Reading', 'ADC', -32768, 32767),
+      value: reading?.fsr ?? 0,
+      status,
+    },
+    {
+      ...makeSensor('pressure', 'Pressure Detected', '', 0, 1),
+      value: reading ? Number(reading.pressureDetected) : 0,
+      status,
+    },
+    {
+      ...makeSensor('accel-x', 'Acceleration X', 'g', -2, 2),
+      value: reading?.ax ?? 0,
+      status,
+    },
+  ]
+
+  const joint: SensorReading[] = [
+    {
+      ...makeSensor('accel-y', 'Acceleration Y', 'g', -2, 2),
+      value: reading?.ay ?? 0,
+      status,
+    },
+    {
+      ...makeSensor('accel-z', 'Acceleration Z', 'g', -2, 2),
+      value: reading?.az ?? 0,
+      status,
+    },
+  ]
+
+  const force: SensorReading[] = [
+    {
+      ...makeSensor('gyro-x', 'Gyroscope X', '°/s', -250, 250),
+      value: reading?.gx ?? 0,
+      status,
+    },
+    {
+      ...makeSensor('gyro-y', 'Gyroscope Y', '°/s', -250, 250),
+      value: reading?.gy ?? 0,
+      status,
+    },
+    {
+      ...makeSensor('gyro-z', 'Gyroscope Z', '°/s', -250, 250),
+      value: reading?.gz ?? 0,
+      status,
+    },
+  ]
+
+  const allSensors = [...gait, ...joint, ...force]
+  const connectedCount = allSensors.filter(
+    (sensor) => sensor.status === 'connected',
+  ).length
 
   return {
     running,
@@ -157,7 +194,7 @@ export function useMonitoringSensors() {
     stop,
     sensors: { gait, joint, force },
     connectedCount,
-    totalCount,
+    totalCount: allSensors.length,
     graphs: { flexLeftSeries, flexRightSeries, forceSeries },
   }
 }
